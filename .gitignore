@@ -1,0 +1,93 @@
+# ---------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ---------------------------------------------------------------
+# Environment variables and secrets
+# (never commit credentials; DATABASE_URL lives in .env)
+# ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---------------------------------------------------------------
+# Build outputs
+# ---------------------------------------------------------------
+# Next.js (apps/web)
+.next/
+out/
+next-env.d.ts
+
+# NestJS (apps/api) and shared packages
+dist/
+build/
+*.tsbuildinfo
+
+# ---------------------------------------------------------------
+# Testing and coverage
+# ---------------------------------------------------------------
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# ---------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------------------------------------------
+# Prisma / Database
+# (migrations and seeds ARE versioned; local artifacts are not)
+# ---------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+database/data/
+pgdata/
+postgres-data/
+
+# ---------------------------------------------------------------
+# Docker
+# ---------------------------------------------------------------
+docker-compose.override.yml
+
+# ---------------------------------------------------------------
+# Caches
+# ---------------------------------------------------------------
+.cache/
+.eslintcache
+.turbo/
+.parcel-cache/
+
+# ---------------------------------------------------------------
+# Deployment
+# ---------------------------------------------------------------
+.vercel/
+
+# ---------------------------------------------------------------
+# Editors and OS
+# ---------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

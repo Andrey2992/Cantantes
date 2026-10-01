@@ -1,0 +1,24 @@
+{
+  "name": "cantantes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isaac Sanchez - interactive WebGL portfolio monorepo (Next.js frontend + NestJS API).",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:web": "npm run dev --workspace @cantantes/web",
+    "dev:api": "npm run start:dev --workspace @cantantes/api",
+    "build": "npm run build --workspace @cantantes/types && npm run build --workspace @cantantes/shared && npm run build --workspace @cantantes/api && npm run build --workspace @cantantes/web",
+    "start:web": "npm run start --workspace @cantantes/web",
+    "start:api": "npm run start:prod --workspace @cantantes/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}

@@ -20,7 +20,7 @@ Its purpose is to present:
 
 The visual experience is based on the Google Stitch specification located at:
 
-`stitch-reference/portfolio-prd.md`
+`stitch-reference/technical_brief.md`
 
 That document is the primary source of truth for the intended visual design and interaction model of the frontend.
 
@@ -47,7 +47,7 @@ The repository must follow this high-level structure:
 │   └── seeds/
 │
 ├── stitch-reference/
-│   └── portfolio-prd.md
+│   └── technical_brief.md
 │
 ├── .opencode/
 │   ├── skills/
@@ -103,7 +103,7 @@ The frontend stack is:
 
 The frontend must preserve the design and interaction model defined in:
 
-`stitch-reference/portfolio-prd.md`
+`stitch-reference/technical_brief.md`
 
 The Stitch PRD has priority for visual and interaction requirements.
 
@@ -624,7 +624,7 @@ Priority order:
 
 1. Explicit user requirements
 2. This AGENTS.md
-3. `stitch-reference/portfolio-prd.md`
+3. `stitch-reference/technical_brief.md`
 4. Existing executable project configuration
 5. Framework conventions
 
