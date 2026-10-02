@@ -1,0 +1,32 @@
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cantantes-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-cantantes}
+      # Deterministic locale/encoding so migrations behave the same everywhere.
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+    ports:
+      # Bound to loopback only: the database is not exposed to the local network.
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      # Named volume (not a bind mount) keeps data out of the repository tree.
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-cantantes}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    command:
+      - postgres
+      - '-c'
+      - 'log_min_duration_statement=200'
+
+volumes:
+  postgres-data:
+    name: cantantes-postgres-data

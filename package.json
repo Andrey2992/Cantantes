@@ -17,6 +17,10 @@
     "build": "npm run build --workspace @cantantes/types && npm run build --workspace @cantantes/shared && npm run build --workspace @cantantes/api && npm run build --workspace @cantantes/web",
     "start:web": "npm run start --workspace @cantantes/web",
     "start:api": "npm run start:prod --workspace @cantantes/api",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:ps": "docker compose ps",
+    "db:logs": "docker compose logs -f postgres",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present"
