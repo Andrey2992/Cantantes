@@ -44,11 +44,24 @@ is a NestJS modular monolith organized with Domain-Driven Design.
 
 ### Current state
 
-The frontend is a framework scaffold; no portfolio UI exists yet. On the backend,
-PostgreSQL (Docker) and Prisma are configured and connected, but **the Prisma
-schema has no models yet** and there is no domain model, use case or API
-endpoint beyond the NestJS default health check. `apps/api` and `apps/web`
-otherwise contain framework defaults only.
+The frontend is a framework scaffold; no portfolio UI exists yet. On the
+backend, PostgreSQL (Docker) and Prisma are configured and connected, and the
+Project domain is implemented end to end: aggregate with value objects, read
+use cases, a Prisma repository behind the domain port, and two read-only
+endpoints backed by the first migration. `apps/web` still contains framework
+defaults only.
+
+### API
+
+| Method | Path             | Description                          |
+| ------ | ---------------- | ------------------------------------ |
+| `GET`  | `/projects`      | Project roster (`created_at` order)   |
+| `GET`  | `/projects/:slug`| One project by canonical slug (404)  |
+
+`:slug` is validated through the domain `ProjectSlug`, so a non-canonical value
+is a `400`. Errors always answer `{ statusCode, error, message }`; unexpected
+failures are logged server-side and answered with a constant `500` body. There
+are no write endpoints and no authentication yet.
 
 ---
 
@@ -117,9 +130,11 @@ cd apps/api
 npm run start:dev
 ```
 
-Default URL: <http://localhost:3001> (health check: `GET /`)
+Default URL: <http://localhost:3001>
 
-> Change the API port with the `PORT` environment variable.
+> Change the API port with `PORT`, and the browser origins allowed by CORS with
+> the comma-separated `WEB_ORIGIN`. Both are validated at boot together with
+> `DATABASE_URL` (`apps/api/src/infrastructure/config/api-config.ts`).
 
 ### Production mode
 
@@ -156,7 +171,7 @@ Prisma 7 is configured in `apps/api`:
 | --------------------------- | ------------------------------------------------------------- |
 | `prisma/schema.prisma`      | Models and datasource provider (`postgresql`)                 |
 | `prisma7.config.ts`         | Datasource URL from `DATABASE_URL`, schema and migration paths |
-| `generated/prisma`          | Generated client, git-ignored, regenerated on build            |
+| `src/generated/prisma`      | Generated client, git-ignored, regenerated on build            |
 
 ```bash
 npm run db:status           # migration state (also proves connectivity)
@@ -215,20 +230,21 @@ install libraries speculatively — see `AGENTS.md` sections 4 and 18.
 
 ## 8. Backend Architecture (DDD)
 
-`apps/api/src` will be organized by layer, not by framework:
+`apps/api/src` is organized by layer, not by framework:
 
 ```text
 src/
-├── domain/          # entities, value objects, repository interfaces, services
+├── domain/          # entities, value objects, repository interfaces
 ├── application/     # use cases that coordinate the domain
-├── infrastructure/  # Prisma, repositories, config, external services
-├── presentation/    # controllers, routes, DTOs, middleware, guards
-└── common/          # cross-cutting framework helpers
+├── infrastructure/  # Prisma, repositories, config
+├── presentation/    # controllers, DTO mappers, pipes, filters
+├── bootstrap/       # runtime app configuration shared with the tests
+└── app.module.ts    # composition root: the only file that knows every layer
 ```
 
-Dependency rule: `domain` depends on nothing. `infrastructure` implements
-`domain` repository interfaces. Controllers stay thin and hold no business
-rules.
+Dependency rule: `domain` depends on nothing. `application` depends on domain
+interfaces only. `infrastructure` implements those interfaces. Controllers stay
+thin and hold no business rules.
 
 ---
 
@@ -248,8 +264,8 @@ Database credentials are never committed.
 4. ✅ Shared TypeScript configuration
 5. ✅ PostgreSQL with Docker
 6. ✅ Prisma
-7. ⬜ Initial domain model
-8. ⬜ Backend use cases and API
+7. ✅ Initial domain model
+8. ✅ Backend use cases and API
 9. ⬜ Connect frontend to API
 10. ⬜ Reproduce the Stitch frontend faithfully
 11. ⬜ Three.js and GSAP interactions

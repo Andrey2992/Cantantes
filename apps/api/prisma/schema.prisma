@@ -5,14 +5,46 @@
 // what `docker-compose.yml` uses to start PostgreSQL.
 //
 // Models added here describe the database, not the domain. The generated client
-// (`generated/prisma`, git-ignored) must only be imported from the infrastructure
-// layer, never from domain code (AGENTS.md §13).
+// (`src/generated/prisma`, git-ignored) must only be imported from the
+// infrastructure layer, never from domain code (AGENTS.md §13). It lives inside
+// `src` so `nest build` can compile it under this package's `rootDir`.
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+/// Persistence shape of a portfolio project.
+///
+/// This is a storage concern, not the domain entity: the API never returns these
+/// rows directly. `infrastructure/repositories/PrismaProjectRepository.ts` maps
+/// each row into the `Project` aggregate, which re-validates every invariant
+/// (AGENTS.md sections 8 and 13).
+model Project {
+  /// Opaque identifier produced by the write path. The domain never parses it,
+  /// so no database-side default is declared here.
+  id String @id
+
+  /// Public URL identity (Stitch PRD section 6, Phase 6). Canonical kebab-case,
+  /// guaranteed by the domain before a row can be written.
+  slug String @unique
+
+  /// Single-line display text used by the typographic index (PRD 3.2) and the
+  /// contextual badge (PRD 3.5).
+  title String
+
+  /// Atmospheric gradient stops and accent of this project state (PRD 3.4).
+  /// Stored as `#rrggbb`, normalized by the domain.
+  themeFrom   String @map("theme_from")
+  themeTo     String @map("theme_to")
+  themeAccent String @map("theme_accent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("projects")
 }
