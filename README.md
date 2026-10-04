@@ -27,7 +27,7 @@ is a NestJS modular monolith organized with Domain-Driven Design.
 │   └── types/                  # TypeScript contracts shared by web + api
 │
 ├── database/
-│   ├── migrations/             # Versioned schema migrations (empty for now)
+│   ├── migrations/             # Versioned Prisma migrations (empty for now)
 │   └── seeds/                  # Development/demo seed data (empty for now)
 │
 ├── stitch-reference/           # Product/design documentation (read-only)
@@ -44,9 +44,11 @@ is a NestJS modular monolith organized with Domain-Driven Design.
 
 ### Current state
 
-The repository is **scaffolded only**. There is no domain model, no Prisma
-schema, no PostgreSQL configuration and no portfolio UI yet. `apps/api` and
-`apps/web` contain framework defaults only.
+The frontend is a framework scaffold; no portfolio UI exists yet. On the backend,
+PostgreSQL (Docker) and Prisma are configured and connected, but **the Prisma
+schema has no models yet** and there is no domain model, use case or API
+endpoint beyond the NestJS default health check. `apps/api` and `apps/web`
+otherwise contain framework defaults only.
 
 ---
 
@@ -67,6 +69,19 @@ npm install
 
 This installs and links every workspace: `apps/web`, `apps/api`,
 `packages/types` and `packages/shared`.
+
+### Environment
+
+Database credentials are never committed. Copy the template and adjust it if
+needed:
+
+```bash
+cp .env.example .env
+```
+
+`.env` holds the `POSTGRES_*` values used by Docker Compose plus the
+`DATABASE_URL` Prisma connects with. Both tools read that single file, so the
+values can never drift apart.
 
 ---
 
@@ -116,7 +131,49 @@ npm run start:web   # next start
 
 ---
 
-## 5. Root Scripts
+## 5. Database
+
+PostgreSQL 16 runs in Docker and is the only persistence layer.
+
+```bash
+npm run db:up      # start the container (healthy-checked)
+npm run db:ps      # container status
+npm run db:logs    # follow PostgreSQL logs
+npm run db:down    # stop the container (data volume is kept)
+```
+
+Credentials live in the repository-root `.env`, which is git-ignored and is read
+by **both** `docker-compose.yml` and Prisma. `DATABASE_URL` is derived from the
+`POSTGRES_*` values in that same file:
+
+```text
+Docker → PostgreSQL → Prisma → NestJS
+```
+
+Prisma 7 is configured in `apps/api`:
+
+| File                        | Purpose                                                       |
+| --------------------------- | ------------------------------------------------------------- |
+| `prisma/schema.prisma`      | Models and datasource provider (`postgresql`)                 |
+| `prisma7.config.ts`         | Datasource URL from `DATABASE_URL`, schema and migration paths |
+| `generated/prisma`          | Generated client, git-ignored, regenerated on build            |
+
+```bash
+npm run db:status           # migration state (also proves connectivity)
+npm run db:generate         # regenerate the Prisma client
+npm run db:migrate          # create + apply a migration (development)
+npm run db:migrate:deploy   # apply pending migrations (production)
+npm run db:studio           # Prisma Studio
+```
+
+Migrations are versioned at the repository level in `database/migrations/`, not
+inside `apps/api`. The generated Prisma client must only be imported from
+`infrastructure`; domain code depends on repository interfaces instead — see
+`AGENTS.md` sections 10 and 13.
+
+---
+
+## 6. Root Scripts
 
 | Script                 | Description                                                  |
 | ---------------------- | ------------------------------------------------------------ |
@@ -125,13 +182,21 @@ npm run start:web   # next start
 | `npm run build`        | Build shared packages, the API and then the web app          |
 | `npm run start:web`    | Serve the production web build                               |
 | `npm run start:api`    | Run the compiled API (`dist/main`)                          |
+| `npm run db:up`        | Start the PostgreSQL container                               |
+| `npm run db:down`      | Stop the PostgreSQL container                                |
+| `npm run db:ps`        | Show the PostgreSQL container status                         |
+| `npm run db:logs`      | Follow the PostgreSQL logs                                   |
+| `npm run db:generate`  | Regenerate the Prisma client                                 |
+| `npm run db:migrate`   | Create and apply a migration (development)                   |
+| `npm run db:status`    | Show the migration state                                     |
+| `npm run db:studio`    | Open Prisma Studio                                           |
 | `npm run lint`         | Lint every workspace that defines a `lint` script            |
 | `npm run typecheck`    | Type-check every workspace that defines a `typecheck` script |
 | `npm run test`         | Run tests in every workspace that defines a `test` script    |
 
 ---
 
-## 6. Planned Stack
+## 7. Planned Stack
 
 | Layer            | Technology                        | Status          |
 | ---------------- | --------------------------------- | --------------- |
@@ -139,15 +204,16 @@ npm run start:web   # next start
 | Styling          | Tailwind CSS                      | Scaffolded      |
 | 3D / Motion      | Three.js, GSAP                    | Not installed   |
 | Backend          | NestJS, TypeScript                | Scaffolded      |
-| Persistence      | Prisma + PostgreSQL (Docker)      | Not configured  |
+| Persistence      | Prisma + PostgreSQL (Docker)      | Configured      |
 
-Dependencies are added incrementally, only when the corresponding feature is
-implemented. Do not install libraries speculatively — see `AGENTS.md`
-sections 4 and 18.
+Prisma and PostgreSQL are installed and connected, but the schema has no models
+yet: the persistence model arrives with the domain model. Dependencies are
+added incrementally, only when the corresponding feature is implemented. Do not
+install libraries speculatively — see `AGENTS.md` sections 4 and 18.
 
 ---
 
-## 7. Backend Architecture (DDD)
+## 8. Backend Architecture (DDD)
 
 `apps/api/src` will be organized by layer, not by framework:
 
@@ -166,7 +232,7 @@ rules.
 
 ---
 
-## 8. Git
+## 9. Git
 
 `.gitignore` excludes dependencies, build output, `.next/`, `dist/`, coverage,
 logs, local database artifacts and every `.env*` file except `.env.example`.
@@ -174,14 +240,14 @@ Database credentials are never committed.
 
 ---
 
-## 9. Roadmap
+## 10. Roadmap
 
 1. ✅ Monorepo structure
 2. ✅ Frontend application
 3. ✅ Backend application
 4. ✅ Shared TypeScript configuration
-5. ⬜ PostgreSQL with Docker
-6. ⬜ Prisma
+5. ✅ PostgreSQL with Docker
+6. ✅ Prisma
 7. ⬜ Initial domain model
 8. ⬜ Backend use cases and API
 9. ⬜ Connect frontend to API

@@ -1,0 +1,18 @@
+// Prisma schema: persistence concerns only.
+//
+// The datasource URL is intentionally absent. On Prisma 7 it is configured in
+// `prisma7.config.ts` and read from the repository-root `.env`, which is also
+// what `docker-compose.yml` uses to start PostgreSQL.
+//
+// Models added here describe the database, not the domain. The generated client
+// (`generated/prisma`, git-ignored) must only be imported from the infrastructure
+// layer, never from domain code (AGENTS.md §13).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
