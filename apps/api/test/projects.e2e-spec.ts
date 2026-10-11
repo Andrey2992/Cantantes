@@ -79,25 +79,25 @@ describe('Projects API (e2e)', () => {
       await createApp(new InMemoryProjectRepository([seeded]));
     });
 
-    it('GET /projects returns the roster as the shared contract', async () => {
+    it('GET /api/v1/projects returns the roster as the shared contract', async () => {
       const response = await request(app.getHttpServer())
-        .get('/projects')
+        .get('/api/v1/projects')
         .expect(200);
 
       expect(response.body).toEqual([projectResponse]);
     });
 
-    it('GET /projects/:slug returns one project', async () => {
+    it('GET /api/v1/projects/:slug returns one project', async () => {
       const response = await request(app.getHttpServer())
-        .get('/projects/sade')
+        .get('/api/v1/projects/sade')
         .expect(200);
 
       expect(response.body).toEqual(projectResponse);
     });
 
-    it('GET /projects/:slug answers 404 for an unknown slug', async () => {
+    it('GET /api/v1/projects/:slug answers 404 for an unknown slug', async () => {
       const response = await request(app.getHttpServer())
-        .get('/projects/avicii')
+        .get('/api/v1/projects/avicii')
         .expect(404);
 
       expect(response.body).toEqual({
@@ -108,10 +108,10 @@ describe('Projects API (e2e)', () => {
     });
 
     it.each(['Sade', 'bad bunny', '-sade', 'sade-', 'bad--bunny'])(
-      'GET /projects/%s answers 400 for a non-canonical slug',
+      'GET /api/v1/projects/%s answers 400 for a non-canonical slug',
       async (slug) => {
         const response = await request(app.getHttpServer())
-          .get(`/projects/${encodeURIComponent(slug)}`)
+          .get(`/api/v1/projects/${encodeURIComponent(slug)}`)
           .expect(400);
 
         expect(response.body).toEqual({
@@ -124,7 +124,7 @@ describe('Projects API (e2e)', () => {
 
     it('allows the configured frontend origin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/projects')
+        .get('/api/v1/projects')
         .set('Origin', 'http://localhost:3000')
         .expect(200);
 
@@ -135,7 +135,7 @@ describe('Projects API (e2e)', () => {
 
     it('does not allow an unknown origin', async () => {
       const response = await request(app.getHttpServer())
-        .get('/projects')
+        .get('/api/v1/projects')
         .set('Origin', 'http://evil.example');
 
       expect(response.headers['access-control-allow-origin']).toBeUndefined();
@@ -149,7 +149,7 @@ describe('Projects API (e2e)', () => {
 
     it('answers 500 without leaking the internal failure', async () => {
       const response = await request(app.getHttpServer())
-        .get('/projects')
+        .get('/api/v1/projects')
         .expect(500);
 
       expect(response.body).toEqual({

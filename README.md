@@ -27,7 +27,7 @@ is a NestJS modular monolith organized with Domain-Driven Design.
 │   └── types/                  # TypeScript contracts shared by web + api
 │
 ├── database/
-│   ├── migrations/             # Versioned Prisma migrations (empty for now)
+│   ├── migrations/             # Versioned Prisma migrations
 │   └── seeds/                  # Development/demo seed data (empty for now)
 │
 ├── stitch-reference/           # Product/design documentation (read-only)
@@ -45,23 +45,44 @@ is a NestJS modular monolith organized with Domain-Driven Design.
 ### Current state
 
 The frontend is a framework scaffold; no portfolio UI exists yet. On the
-backend, PostgreSQL (Docker) and Prisma are configured and connected, and the
-Project domain is implemented end to end: aggregate with value objects, read
-use cases, a Prisma repository behind the domain port, and two read-only
-endpoints backed by the first migration. `apps/web` still contains framework
-defaults only.
+backend, PostgreSQL (Docker) and Prisma are configured, and four bounded
+contexts are implemented end to end:
+
+* **Project** — read-only aggregate with value objects and two endpoints.
+* **Experience** — read-only aggregate (`ExperiencePeriod` value object).
+* **Skill** — read-only aggregate (name + optional category).
+* **Contact** — write-only aggregate that validates and stores a message.
+
+Each context has domain entities and value objects, application use cases, a
+Prisma repository behind a domain port, and HTTP endpoints. A health endpoint
+probes the database. Every endpoint returns accurate, empty results when nothing
+has been authored; no portfolio content is invented. `apps/web` still contains
+framework defaults only.
+
+See [`docs/`](./docs/README.md) for bilingual (EN/ES) architecture, API and
+module documentation.
 
 ### API
 
-| Method | Path             | Description                          |
-| ------ | ---------------- | ------------------------------------ |
-| `GET`  | `/projects`      | Project roster (`created_at` order)   |
-| `GET`  | `/projects/:slug`| One project by canonical slug (404)  |
+Base path: `/api` with URI versioning (`v1` for feature routes). `GET /api/health`
+is version-neutral.
+
+| Method | Path                       | Description                                  |
+| ------ | -------------------------- | -------------------------------------------- |
+| `GET`  | `/api/v1/projects`         | Project roster (`created_at` order)          |
+| `GET`  | `/api/v1/projects/:slug`   | One project by canonical slug (`404`)        |
+| `GET`  | `/api/v1/experience`       | Experience records (newest start date first) |
+| `GET`  | `/api/v1/skills`           | Skills (grouped by category, then name)      |
+| `POST` | `/api/v1/contact`          | Validate and store a contact message (`201`) |
+| `GET`  | `/api/health`              | Liveness + database probe (`200`/`503`)      |
 
 `:slug` is validated through the domain `ProjectSlug`, so a non-canonical value
-is a `400`. Errors always answer `{ statusCode, error, message }`; unexpected
-failures are logged server-side and answered with a constant `500` body. There
-are no write endpoints and no authentication yet.
+is a `400`. `POST /api/v1/contact` validates the body through domain value
+objects and stores it; **it does not send email** and never logs message contents
+or the sender's email. Errors always answer `{ statusCode, error, message }`;
+unexpected failures are logged server-side and answered with a constant `500`
+body. There are no write endpoints for portfolio content and no authentication
+yet — content is authored through migrations.
 
 ---
 
@@ -172,6 +193,10 @@ Prisma 7 is configured in `apps/api`:
 | `prisma/schema.prisma`      | Models and datasource provider (`postgresql`)                 |
 | `prisma7.config.ts`         | Datasource URL from `DATABASE_URL`, schema and migration paths |
 | `src/generated/prisma`      | Generated client, git-ignored, regenerated on build            |
+
+The schema defines four models — `Project`, `Experience`, `Skill` and
+`ContactMessage` — mapped to snake_case tables. They describe storage only; the
+repositories map them into domain aggregates that re-validate every invariant.
 
 ```bash
 npm run db:status           # migration state (also proves connectivity)

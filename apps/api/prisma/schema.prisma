@@ -48,3 +48,50 @@ model Project {
 
   @@map("projects")
 }
+
+/// Persistence shape of a professional experience record.
+///
+/// Storage concern only: `infrastructure/repositories/PrismaExperienceRepository.ts`
+/// maps each row into the `Experience` aggregate, which re-validates every
+/// invariant (AGENTS.md sections 8 and 13). Rows enter through an authoring
+/// migration; the API never invents records (AGENTS.md section 23).
+model Experience {
+  id        String    @id
+  company   String
+  role      String
+  /// Optional description. `NULL` when no summary was authored.
+  summary   String?
+  startDate DateTime  @map("start_date")
+  /// `NULL` while the role is ongoing.
+  endDate   DateTime? @map("end_date")
+
+  @@map("experiences")
+}
+
+/// Persistence shape of a skill entry.
+///
+/// Storage concern only: `infrastructure/repositories/PrismaSkillRepository.ts`
+/// maps each row into the `Skill` aggregate (AGENTS.md sections 8 and 13).
+model Skill {
+  id       String  @id
+  name     String
+  /// Optional grouping label. `NULL` when the skill is uncategorized.
+  category String?
+
+  @@map("skills")
+}
+
+/// Persistence shape of a contact message received through the portfolio form.
+///
+/// Storage concern only: `infrastructure/repositories/PrismaContactMessageRepository.ts`
+/// persists the validated `ContactMessage` aggregate (AGENTS.md sections 8 and 13).
+/// Messages are append-only; nothing is exposed back over HTTP.
+model ContactMessage {
+  id        String   @id
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}

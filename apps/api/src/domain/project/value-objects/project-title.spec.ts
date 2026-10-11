@@ -1,4 +1,4 @@
-import { DomainError } from '../errors/DomainError.js';
+import { DomainError } from '../../shared/errors/DomainError.js';
 import { ProjectTitle } from './ProjectTitle.js';
 
 describe('ProjectTitle', () => {

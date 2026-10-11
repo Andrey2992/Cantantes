@@ -1,5 +1,5 @@
 import { Project } from './Project.js';
-import { DomainError } from '../errors/DomainError.js';
+import { DomainError } from '../../shared/errors/DomainError.js';
 import { ProjectTitle } from '../value-objects/ProjectTitle.js';
 import { ProjectTheme } from '../value-objects/ProjectTheme.js';
 
