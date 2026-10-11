@@ -1,12 +1,12 @@
-# Backend documentation / Documentación del backend
+# Documentation / Documentación
 
-> EN: Learning-oriented documentation for the NestJS + Prisma + PostgreSQL
-> backend of the portfolio. Every document is bilingual (English first, Spanish
-> second).
+> EN: Learning-oriented documentation for the portfolio monorepo: the NestJS +
+> Prisma + PostgreSQL backend and the Next.js frontend integration. Every document
+> is bilingual (English first, Spanish second).
 >
-> ES: Documentación orientada al aprendizaje del backend NestJS + Prisma +
-> PostgreSQL del portafolio. Cada documento es bilingüe (primero inglés, luego
-> español).
+> ES: Documentación orientada al aprendizaje del monorepo del portafolio: el
+> backend NestJS + Prisma + PostgreSQL y la integración del frontend Next.js. Cada
+> documento es bilingüe (primero inglés, luego español).
 
 ## Index / Índice
 
@@ -20,6 +20,8 @@
 | [modules/skills.md](./modules/skills.md) | EN: Skill module. / ES: Módulo Skill. |
 | [modules/contact.md](./modules/contact.md) | EN: Contact module. / ES: Módulo Contact. |
 | [database/persistence.md](./database/persistence.md) | EN: Prisma schema, migrations, mapping. / ES: Esquema Prisma, migraciones, mapeo. |
+| [frontend/api-integration.md](./frontend/api-integration.md) | EN: How the frontend talks to the API: config, transport, errors. / ES: Cómo el frontend habla con la API: configuración, transporte, errores. |
+| [frontend/missing-ui.md](./frontend/missing-ui.md) | EN: Which portfolio screens/forms do not exist yet. / ES: Qué pantallas/formularios del portafolio aún no existen. |
 
 ## How to read this / Cómo leer esto
 

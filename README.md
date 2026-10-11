@@ -56,11 +56,16 @@ contexts are implemented end to end:
 Each context has domain entities and value objects, application use cases, a
 Prisma repository behind a domain port, and HTTP endpoints. A health endpoint
 probes the database. Every endpoint returns accurate, empty results when nothing
-has been authored; no portfolio content is invented. `apps/web` still contains
-framework defaults only.
+has been authored; no portfolio content is invented.
 
-See [`docs/`](./docs/README.md) for bilingual (EN/ES) architecture, API and
-module documentation.
+On the frontend, `apps/web` now contains a small, typed, **server-only** API
+integration layer (`apps/web/lib/api`) that consumes those endpoints and reuses
+the shared `@cantantes/types` contracts, plus a contact Server Action. The
+portfolio UI itself does not exist yet, so the layer is not mounted into any
+screen; see [`docs/frontend/`](./docs/frontend/api-integration.md).
+
+See [`docs/`](./docs/README.md) for bilingual (EN/ES) architecture, API, module
+and frontend integration documentation.
 
 ### API
 
@@ -137,6 +142,18 @@ npm run dev
 ```
 
 Default URL: <http://localhost:3000>
+
+> The frontend talks to the API through a server-only layer. Set the API origin in
+> `apps/web/.env.local` (copy `apps/web/.env.example`):
+>
+> ```bash
+> API_BASE_URL=http://localhost:3001
+> ```
+>
+> It has no `NEXT_PUBLIC_` prefix on purpose: the browser never learns the API
+> origin. Nothing renders the data yet (the Stitch UI is a later phase); see
+> [`docs/frontend/api-integration.md`](./docs/frontend/api-integration.md) and
+> [`docs/frontend/missing-ui.md`](./docs/frontend/missing-ui.md).
 
 ### Backend — `apps/api` (NestJS)
 
@@ -238,18 +255,19 @@ inside `apps/api`. The generated Prisma client must only be imported from
 
 ## 7. Planned Stack
 
-| Layer            | Technology                        | Status          |
-| ---------------- | --------------------------------- | --------------- |
-| Frontend         | Next.js, React, TypeScript         | Scaffolded      |
-| Styling          | Tailwind CSS                      | Scaffolded      |
-| 3D / Motion      | Three.js, GSAP                    | Not installed   |
-| Backend          | NestJS, TypeScript                | Scaffolded      |
-| Persistence      | Prisma + PostgreSQL (Docker)      | Configured      |
+| Layer            | Technology                        | Status              |
+| ---------------- | --------------------------------- | ------------------- |
+| Frontend         | Next.js, React, TypeScript         | Scaffolded + API layer |
+| Styling          | Tailwind CSS                      | Scaffolded          |
+| 3D / Motion      | Three.js, GSAP                    | Not installed       |
+| Backend          | NestJS, TypeScript                | Implemented         |
+| Persistence      | Prisma + PostgreSQL (Docker)      | Configured          |
 
-Prisma and PostgreSQL are installed and connected, but the schema has no models
-yet: the persistence model arrives with the domain model. Dependencies are
-added incrementally, only when the corresponding feature is implemented. Do not
-install libraries speculatively — see `AGENTS.md` sections 4 and 18.
+Prisma and PostgreSQL are installed and connected, and the schema defines the
+four models of the current contexts (`Project`, `Experience`, `Skill`,
+`ContactMessage`). Dependencies are added incrementally, only when the
+corresponding feature is implemented. Do not install libraries speculatively —
+see `AGENTS.md` sections 4 and 18.
 
 ---
 
@@ -291,7 +309,7 @@ Database credentials are never committed.
 6. ✅ Prisma
 7. ✅ Initial domain model
 8. ✅ Backend use cases and API
-9. ⬜ Connect frontend to API
+9. ✅ Connect frontend to API (typed server-only layer; UI pending)
 10. ⬜ Reproduce the Stitch frontend faithfully
 11. ⬜ Three.js and GSAP interactions
 12. ⬜ Tests
